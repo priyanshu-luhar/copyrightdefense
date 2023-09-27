@@ -1,1 +1,1 @@
-This is a parody game which is designed to be a rip off of plants vs zombies
+This is a game project inspired from the old and classic game of Vampire Survivors
