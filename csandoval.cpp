@@ -26,29 +26,35 @@ void handleMenu() {
         glPushMatrix();
         glColor3f(1.0, 1.0, 1.0);
         Rect r;
-        r.center = 0;
-        r.bot = gl.yres - 20;
-        r.left = 10;
+        r.bot = gl.yres / 1.5;
+        r.left = gl.xres / 2;
+        r.center = 1;
 
-        // Display menu options
-        ggprint8b(&r, 16, 0x00ffffff, "Main Menu");
-        r.bot -= 40;
+        ggprint16(&r, 60, 0x00ffffff, "Copyright Onslaught!");  // Increase font size to 60
+        r.bot -= 60;  // Adjust the vertical spacing
+
+        // // Display menu options with larger fonts
+        // ggprint8b(&r, 24, 0x00ffffff, "Main Menu");  // Increase font size to 24
+        // r.bot -= 40;  // Adjust the vertical spacing
+
         if (menuChoice == 0)
-            ggprint8b(&r, 16, 0x00ff0000, "> Start Game");
+            ggprint8b(&r, 24, 0x00ff0000, "> Start Game");  // Increase font size to 24
         else
-            ggprint8b(&r, 16, 0x00ffffff, "Start Game");
+            ggprint8b(&r, 24, 0x00ffffff, "Start Game");  // Increase font size to 24
 
-        r.bot -= 20;
+        r.bot -= 20;  // Adjust the vertical spacing
+
         if (menuChoice == 1)
-            ggprint8b(&r, 16, 0x00ff0000, "> Options");
+            ggprint8b(&r, 24, 0x00ff0000, "> Options");  // Increase font size to 24
         else
-            ggprint8b(&r, 16, 0x00ffffff, "Options");
+            ggprint8b(&r, 24, 0x00ffffff, "Options");  // Increase font size to 24
 
-        r.bot -= 20;
+        r.bot -= 20;  // Adjust the vertical spacing
+
         if (menuChoice == 2)
-            ggprint8b(&r, 16, 0x00ff0000, "> Quit");
+            ggprint8b(&r, 24, 0x00ff0000, "> Quit");  // Increase font size to 24
         else
-            ggprint8b(&r, 16, 0x00ffffff, "Quit");
+            ggprint8b(&r, 24, 0x00ffffff, "Quit");  // Increase font size to 24
 
         glPopMatrix();
         x11.swapBuffers();
@@ -79,6 +85,7 @@ void handleMenu() {
         }
     }
 }
+
 
 
 void nightmodefilter(int xres, int yres)
@@ -130,5 +137,5 @@ void display_name(int x, int y)
 	r.bot = y;
 	r.left = x;
 	r.center = 0;
-    ggprint8b(&r, 0, 0xFFFFFFF, "Carlos");
+    ggprint8b(&r, 0, 0xFFFFFFF, "Player");
 }	

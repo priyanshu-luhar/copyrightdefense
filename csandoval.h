@@ -9,6 +9,7 @@ extern void display_name(int, int);
 extern void display_border(int, int);
 extern void nightmodefilter(int, int);
 extern void handleMenu();
+extern void checkShipAsteroidCollision();
 
 
 class Global {
