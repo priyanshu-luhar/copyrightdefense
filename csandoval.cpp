@@ -33,10 +33,6 @@ void handleMenu() {
         ggprint16(&r, 60, 0x00ffffff, "Copyright Onslaught!");  // Increase font size to 60
         r.bot -= 60;  // Adjust the vertical spacing
 
-        // // Display menu options with larger fonts
-        // ggprint8b(&r, 24, 0x00ffffff, "Main Menu");  // Increase font size to 24
-        // r.bot -= 40;  // Adjust the vertical spacing
-
         if (menuChoice == 0)
             ggprint8b(&r, 24, 0x00ff0000, "> Start Game");  // Increase font size to 24
         else
@@ -45,9 +41,9 @@ void handleMenu() {
         r.bot -= 20;  // Adjust the vertical spacing
 
         if (menuChoice == 1)
-            ggprint8b(&r, 24, 0x00ff0000, "> Options");  // Increase font size to 24
+            ggprint8b(&r, 24, 0x00ff0000, "> Credits");  // Increase font size to 24
         else
-            ggprint8b(&r, 24, 0x00ffffff, "Options");  // Increase font size to 24
+            ggprint8b(&r, 24, 0x00ffffff, "Credits");  // Increase font size to 24
 
         r.bot -= 20;  // Adjust the vertical spacing
 
@@ -68,8 +64,7 @@ void handleMenu() {
                     if (menuChoice == 0) {
                         inMenu = false;  // Start the game
                     } else if (menuChoice == 1) {
-                        // Open Options menu (customize this part)
-                        // Example: inOptions = true;
+                        // Example: inCredits = true;
                     } else if (menuChoice == 2) {
                         // Quit the game
                         exit(0);
@@ -86,7 +81,34 @@ void handleMenu() {
     }
 }
 
+void displayGameOver() {
+    // Display "Game Over" and reset the game
+    glClear(GL_COLOR_BUFFER_BIT);
+    Rect r;
+    r.bot = gl.yres / 2;
+    r.left = gl.xres / 2;
+    r.center = 1;
+    ggprint16(&r, 50, 0xFF0000, "GAME OVER");
+    x11.swapBuffers();
+    // Add a 3-second delay using usleep
+    usleep(3000000); // 3 seconds
+	exit(0);
+}
+//----------------------------------------------------------------------------------------------------//
 
+void displayYouWin() {
+    // Display "You Win" and reset the game
+    glClear(GL_COLOR_BUFFER_BIT);
+    Rect r;
+    r.bot = gl.yres / 2;
+    r.left = gl.xres / 2;
+    r.center = 1;
+    ggprint16(&r, 50, 0x00FF00, "YOU WIN!");
+    x11.swapBuffers();
+    // Add a 3-second delay using usleep
+    usleep(3000000); // 3 seconds
+	exit(0);
+}
 
 void nightmodefilter(int xres, int yres)
 {

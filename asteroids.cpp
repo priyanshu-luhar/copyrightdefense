@@ -53,11 +53,14 @@ void physics();
 void render();
 void checkShipAsteroidCollision();
 void displayGameOver();
+void displayYouWin();
 void moveSmallAsteroidsTowardsShip();
 //-----------------------------------------------------------------------------
 //Global Variables
 Global gl;
 X11_wrapper x11(gl.xres, gl.yres);
+bool gameWon = false;
+
 //-----------------------------------------------------------------------------
 //Class Definitions
 class Ship {
@@ -126,44 +129,56 @@ public:
 	bool mouseThrustOn;
 public:
 	Game() {
-		ahead = NULL;
-		barr = new Bullet[MAX_BULLETS];
-		nasteroids = 0;
-		nbullets = 0;
-		mouseThrustOn = false;
-		//build 10 asteroids...
-		for (int j=0; j<10; j++) {
-			Asteroid *a = new Asteroid;
-			a->nverts = 6;
-			a->radius = rnd()*10.0 + 40.0;
-			Flt r2 = a->radius / 2.0;
-			Flt angle = 0.0f;
-			Flt inc = (PI * 2.0) / (Flt)a->nverts;
-			for (int i=0; i<a->nverts; i++) {
-				a->vert[i][0] = sin(angle) * (r2 + rnd() * a->radius);
-				a->vert[i][1] = cos(angle) * (r2 + rnd() * a->radius);
-				angle += inc;
-			}
-			a->pos[0] = (Flt)(rand() % gl.xres) * 3;
-			a->pos[1] = (Flt)(rand() % gl.yres);
-			a->pos[2] = 0.0f;
-			a->angle = 0.0;
-			//a->rotate = rnd() * 4.0 - 2.0;
-			a->color[0] = 0.8;
-			a->color[1] = 0.8;
-			a->color[2] = 0.7;
-			a->vel[0] = (Flt)(rnd()*2.0-1.0);
-			a->vel[1] = (Flt)(rnd()*2.0-1.0);
-			//std::cout << "asteroid" << std::endl;
-			//add to front of linked list
-			a->next = ahead;
-			if (ahead != NULL)
-				ahead->prev = a;
-			ahead = a;
-			++nasteroids;
-		}
-		clock_gettime(CLOCK_REALTIME, &bulletTimer);
-	}
+    ahead = NULL;
+    barr = new Bullet[MAX_BULLETS];
+    nasteroids = 0;
+    nbullets = 0;
+    mouseThrustOn = false;
+
+    for (int j = 0; j < 2; j++) {
+        Asteroid *a = new Asteroid;
+        a->nverts = 6;
+        a->radius = rnd() * 10.0 + 40.0;
+        a->angle = 0.0f;
+		a->color[0] = 1.0;
+		a->color[1] = 1.0;
+		a->color[2] = 1.0;
+
+        a->vel[0] = (Flt)(rnd() * 2.0 - 1.0);
+        a->vel[1] = (Flt)(rnd() * 2.0 - 1.0);
+
+        // Modify the initialization of asteroid positions
+        int side = random(4);
+        if (side == 0) {
+            // Spawn on the left edge
+            a->pos[0] = 0.0f;
+            a->pos[1] = rnd() * (float)gl.yres;
+        } else if (side == 1) {
+            // Spawn on the top edge
+            a->pos[0] = rnd() * (float)gl.xres;
+            a->pos[1] = (float)gl.yres;
+        } else if (side == 2) {
+            // Spawn on the right edge
+            a->pos[0] = (float)gl.xres;
+            a->pos[1] = rnd() * (float)gl.yres;
+        } else {
+            // Spawn on the bottom edge
+            a->pos[0] = rnd() * (float)gl.xres;
+            a->pos[1] = 0.0f;
+        }
+
+        // Add to front of linked list
+        a->next = ahead;
+        if (ahead != NULL) {
+            ahead->prev = a;
+        }
+        ahead = a;
+        ++nasteroids;
+    }
+
+    clock_gettime(CLOCK_REALTIME, &bulletTimer);
+}
+
 	~Game() {
 		delete [] barr;
 	}
@@ -456,24 +471,12 @@ void buildAsteroidFragment(Asteroid *ta, Asteroid *a)
 	ta->color[0] = 0.8;
 	ta->color[1] = 0.8;
 	ta->color[2] = 0.7;
-	ta->vel[0] = a->vel[0] + (rnd()*2.0-1.0);
-	ta->vel[1] = a->vel[1] + (rnd()*2.0-1.0);
+	ta->vel[0] = a->vel[0] + (rnd()*1.0-0.5);
+	ta->vel[1] = a->vel[1] + (rnd()*1.0-0.5);
 	//std::cout << "frag" << std::endl;
 }
 
-//----------------------------------------------------------------------------------------------------//
-void displayGameOver() {
-    glClear(GL_COLOR_BUFFER_BIT);
-    Rect r;
-    r.bot = gl.yres / 2;
-    r.left = gl.xres / 2;
-    r.center = 1;
-    ggprint16(&r, 50, 0xFF0000, "GAME OVER");
-    x11.swapBuffers();
 
-    // Add a delay (you can adjust this value)
-    usleep(3000000); // 5 seconds
-}
 //----------------------------------------------------------------------------------------------------//
 void checkShipAsteroidCollision() {
     Asteroid *a = g.ahead;
@@ -493,6 +496,7 @@ void checkShipAsteroidCollision() {
         a = a->next;
     }
 }
+
 //----------------------------------------------------------------------------------------------------//
 void moveSmallAsteroidsTowardsShip() {
     Asteroid *a = g.ahead;
@@ -542,6 +546,11 @@ void physics()
 	else if (g.ship.pos[1] > (float)gl.yres) {
 		g.ship.pos[1] -= (float)gl.yres;
 	}
+
+	if (g.nasteroids == 10) {
+        // Set the gameWon flag to true
+        gameWon = true;
+    }
 	//
 	//
 	//Update bullet positions
@@ -746,6 +755,11 @@ void render()
 	ggprint8b(&r, 16, 0x00ffff00, "n bullets: %i", g.nbullets);
 	ggprint8b(&r, 16, 0x00ffff00, "Number of Enemies: %i", g.nasteroids);
 
+	if (gameWon) {
+        displayYouWin(); // Display "You Win" screen
+        return;
+    }
+
 	if (gl.nightmodefilter){
 		nightmodefilter(gl.xres, gl.yres);
 	}
@@ -797,34 +811,45 @@ void render()
 			glVertex2f(g.ship.pos[0]+xe,g.ship.pos[1]+ye);
 		}
 		glEnd();
+		
 	}
 	//-------------------------------------------------------------------------
 	//Draw the asteroids
 	{
 		Asteroid *a = g.ahead;
-		while (a) {
-			//Log("draw asteroid...\n");
-			glColor3fv(a->color);
-			glPushMatrix();
-			glTranslatef(a->pos[0], a->pos[1], a->pos[2]);
-			//glRotatef(a->angle, 0.0f, 0.0f, 1.0f);
-			glBegin(GL_LINE_LOOP);
-			//Log("%i verts\n",a->nverts);
-			for (int j=0; j<a->nverts; j++) {
-				glVertex2f(a->vert[j][0], a->vert[j][1]);
-			}
-			glEnd();
-			//glBegin(GL_LINES);
-			//	glVertex2f(0,   0);
-			//	glVertex2f(a->radius, 0);
-			//glEnd();
-			glPopMatrix();
-			glColor3f(1.0f, 0.0f, 1.0f);
-			glBegin(GL_POINTS);
-			glVertex2f(a->pos[0], a->pos[1]);
-			glEnd();
-			a = a->next;
-		}
+    while (a) {
+        glPushMatrix();
+        glTranslatef(a->pos[0], a->pos[1], a->pos[2]);
+        glColor3f(1.0, 0.5, 0.0);  // Orange outline color
+		glLineWidth(5.0f); // You can adjust this value to make the outline thicker		
+
+
+        // Draw a hexagon
+        glBegin(GL_LINE_LOOP);
+        for (int j = 0; j < 6; j++) {
+            float angle = 2.0f * 3.1415926f * j / 6.0f;
+            float x = a->radius * cos(angle);
+            float y = a->radius * sin(angle);
+            glVertex2f(x, y);
+        }
+        glEnd();
+		glLineWidth(1.0f); // Reset line width to its default value
+
+        // Fill the hexagon with grey color
+        glColor3f(0.6, 0.1, 0.1);  // Grey fill color
+        glBegin(GL_POLYGON);
+        for (int j = 0; j < 6; j++) {
+            float angle = 2.0f * 3.1415926f * j / 6.0f;
+            float x = a->radius * cos(angle);
+            float y = a->radius * sin(angle);
+            glVertex2f(x, y);
+        }
+        glEnd();
+
+		
+        glPopMatrix();
+        a = a->next;
+    }
 	}
 	//-------------------------------------------------------------------------
 	//Draw the bullets

@@ -21,8 +21,8 @@ public:
 	char keys[65536];
 	int mouse;
 	Global() {
-		xres = 640;
-		yres = 480;
+		xres = 700;
+		yres = 540;
 		memset(keys, 0, 65536);
 		show_name = 0;
 		nightmodefilter = 0;
