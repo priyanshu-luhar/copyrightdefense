@@ -195,8 +195,9 @@ public:
 //==========================================================================
 // M A I N
 //==========================================================================
-int main(){
-    
+int main()
+{
+    time_since_mouse_move(false);    
 	logOpen();
 	init_opengl();
 	srand(time(NULL));
@@ -324,6 +325,7 @@ void check_mouse(XEvent *e)
 	//keys[XK_Up] = 0;
 	if (savex != e->xbutton.x || savey != e->xbutton.y) {
 		//Mouse moved
+        time_since_mouse_move(false);
         //
         /*
 		int xdiff = savex - e->xbutton.x;
@@ -801,6 +803,8 @@ void render()
 		ggprint13(&r, 20, 0x0055ff55, "Statistics...");
 		ggprint13(&r, 16, 0x0055ff55, "sec_running_time:  %i", 
 									total_running_time(true));
+		ggprint13(&r, 16, 0x0055ff55, "sec since mouse move:  %i", 
+									time_since_mouse_move(true));
 		ggprint13(&r, 16, 0x0055ff55, "Mouse Distance:  %lf", 
 									mouse_movement_distance(-1, -1, true));
 		ggprint13(&r, 16, 0x0055ff55, "N Render Calls:  %i", 
