@@ -19,6 +19,7 @@ extern X11_wrapper x11;
 
 
 
+int total_running_time
 void handleMenu() {
     int menuChoice = 0;
     bool inMenu = true;

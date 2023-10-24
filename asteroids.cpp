@@ -91,6 +91,55 @@ public:
 	}
 };
 
+class PowerUp {
+private:
+    Vec pos;        // Position of the power-up
+    float radius;   // Radius of the power-up
+    bool collected; // True if the power-up has been collected
+
+public:
+    PowerUp() {
+        // Default constructor logic
+        pos[0] = rand() % gl.xres;
+        pos[1] = rand() % gl.yres;
+        pos[2] = 0;
+        radius = 20.0f; // Default radius, can be adjusted
+        collected = false;
+    }
+
+    // Check collision with the ship
+    bool checkCollision(Ship &ship) {
+        if (collected) return false;
+
+        float dist = sqrt((ship.pos[0]-pos[0])*(ship.pos[0]-pos[0]) +
+                          (ship.pos[1]-pos[1])*(ship.pos[1]-pos[1]));
+        if (dist < (radius + ship.radius)) {
+            collected = true;
+            // Handle the power-up effect here, e.g., activate double-barrel shooting
+            ship.doubleBarrelActive = true;
+            return true;
+        }
+        return false;
+    }
+
+    void render() {
+        if (collected) return;
+
+        glColor3f(0.0f, 1.0f, 0.0f); // Green color for power-up
+        glPushMatrix();
+        glTranslatef(pos[0], pos[1], pos[2]);
+        glBegin(GL_TRIANGLE_FAN);
+        for (int i = 0; i <= 20; i++) { // Drawing a circle
+            float theta = 2.0f * 3.1415926f * float(i) / float(20);
+            float x = radius * cosf(theta);
+            float y = radius * sinf(theta);
+            glVertex2f(x, y);
+        }
+        glEnd();
+        glPopMatrix();
+    }
+};
+
 class Bullet {
 public:
 	Vec pos;
@@ -131,6 +180,8 @@ public:
 	struct timespec bulletTimer;
 	struct timespec mouseThrustTimer;
 	bool mouseThrustOn;
+	PowerUp powerUps[MAX_POWERUPS];
+    int numPowerUps;
 public:
 	Game() {
     ahead = NULL;
@@ -138,6 +189,13 @@ public:
     nasteroids = 0;
     nbullets = 0;
     mouseThrustOn = false;
+    numPowerUps = 0;
+	void Game::spawnPowerUp() {
+    if (numPowerUps < MAX_POWERUPS) {
+        PowerUp newPowerUp;
+        powerUps[numPowerUps++] = newPowerUp;
+    	}
+	}
     for (int j = 0; j < 10; j++) {
         Asteroid *a = new Asteroid;
         a->nverts = 6;
