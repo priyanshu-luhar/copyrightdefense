@@ -10,6 +10,8 @@
 #include "log.h"
 #include "fonts.h"
 #include "csandoval.h"
+#include "jhernandez2.h"
+#include "pluhar.h"
 
 //defined types
 typedef float Flt;
@@ -28,7 +30,7 @@ typedef Flt	Matrix[4][4];
 						(c)[2]=(a)[2]-(b)[2]
 //constants
 const float timeslice = 1.0f;
-const float gravity = 3.0f;
+const float gravity = 2.2f;
 #define PI 3.141592653589793
 #define ALPHA 1
 const int MAX_BULLETS = 4;
@@ -60,6 +62,8 @@ void moveSmallAsteroidsTowardsShip();
 Global gl;
 X11_wrapper x11(gl.xres, gl.yres);
 bool gameWon = false;
+bool wasdvar = false;
+
 
 //-----------------------------------------------------------------------------
 //Class Definitions
@@ -72,7 +76,7 @@ public:
 	float angle;
 	float color[3];
 	float radius; // Add this line
-
+    bool doubleBarrelActive;
 public:
 	Ship() {
 		pos[0] = (Flt)(gl.xres/2);
@@ -83,8 +87,57 @@ public:
 		VecZero(acc);
 		angle = 0.0;
 		color[0] = color[1] = color[2] = 1.0;
-		radius = 10.0f;
+		radius = 6.0f;
 	}
+};
+
+class PowerUp {
+private:
+    Vec pos;        // Position of the power-up
+    float radius;   // Radius of the power-up
+    bool collected; // True if the power-up has been collected
+
+public:
+    PowerUp() {
+        // Default constructor logic
+        pos[0] = rand() % gl.xres;
+        pos[1] = rand() % gl.yres;
+        pos[2] = 0;
+        radius = 20.0f; // Default radius, can be adjusted
+        collected = false;
+    }
+
+    // Check collision with the ship
+    bool checkCollision(Ship &ship) {
+        if (collected) return false;
+
+        float dist = sqrt((ship.pos[0]-pos[0])*(ship.pos[0]-pos[0]) +
+                          (ship.pos[1]-pos[1])*(ship.pos[1]-pos[1]));
+        if (dist < (radius + ship.radius)) {
+            collected = true;
+            // Handle the power-up effect here, e.g., activate double-barrel shooting
+            ship.doubleBarrelActive = true;
+            return true;
+        }
+        return false;
+    }
+
+    void render() {
+        if (collected) return;
+
+        glColor3f(0.0f, 1.0f, 0.0f); // Green color for power-up
+        glPushMatrix();
+        glTranslatef(pos[0], pos[1], pos[2]);
+        glBegin(GL_TRIANGLE_FAN);
+        for (int i = 0; i <= 20; i++) { // Drawing a circle
+            float theta = 2.0f * 3.1415926f * float(i) / float(20);
+            float x = radius * cosf(theta);
+            float y = radius * sinf(theta);
+            glVertex2f(x, y);
+        }
+        glEnd();
+        glPopMatrix();
+    }
 };
 
 class Bullet {
@@ -127,6 +180,8 @@ public:
 	struct timespec bulletTimer;
 	struct timespec mouseThrustTimer;
 	bool mouseThrustOn;
+	PowerUp powerUps[MAX_POWERUPS];
+    int numPowerUps;
 public:
 	Game() {
     ahead = NULL;
@@ -134,11 +189,17 @@ public:
     nasteroids = 0;
     nbullets = 0;
     mouseThrustOn = false;
-
-    for (int j = 0; j < 2; j++) {
+    numPowerUps = 0;
+	void Game::spawnPowerUp() {
+    if (numPowerUps < MAX_POWERUPS) {
+        PowerUp newPowerUp;
+        powerUps[numPowerUps++] = newPowerUp;
+    	}
+	}
+    for (int j = 0; j < 10; j++) {
         Asteroid *a = new Asteroid;
         a->nverts = 6;
-        a->radius = rnd() * 10.0 + 40.0;
+        a->radius = rnd() * 20.0 + 40.0;
         a->angle = 0.0f;
 		a->color[0] = 1.0;
 		a->color[1] = 1.0;
@@ -175,10 +236,8 @@ public:
         ahead = a;
         ++nasteroids;
     }
-
     clock_gettime(CLOCK_REALTIME, &bulletTimer);
 }
-
 	~Game() {
 		delete [] barr;
 	}
@@ -221,7 +280,6 @@ int main(){
 		x11.swapBuffers();
 		moveSmallAsteroidsTowardsShip();
 		checkShipAsteroidCollision();
-
 	} else {
 	    handleMenu();
 		inMenu = !inMenu;
@@ -350,7 +408,7 @@ void check_mouse(XEvent *e)
 			Flt speed = sqrt(g.ship.vel[0]*g.ship.vel[0]+
 												g.ship.vel[1]*g.ship.vel[1]);
 			if (speed > 10.0f) {
-				speed = 1.0f;
+				speed = 10.0f;
 				normalize2d(g.ship.vel);
 				g.ship.vel[0] *= speed;
 				g.ship.vel[1] *= speed;
@@ -373,6 +431,8 @@ int check_keys(XEvent *e)
 	}
 	int key = (XLookupKeysym(&e->xkey, 0) & 0x0000ffff);
 	//Log("key: %i\n", key);
+	key = wasd(key);
+
 	if (e->type == KeyRelease) {
 		gl.keys[key] = 0;
 		if (key == XK_Shift_L || key == XK_Shift_R)
@@ -392,11 +452,6 @@ int check_keys(XEvent *e)
 		case XK_Escape:
 			return 1;
 
-		case XK_g:
-		gl.show_name = !gl.show_name;
-		gl.renderMenu = !gl.renderMenu;
-			break;
-
 		case XK_n:
 		gl.nightmodefilter = !gl.nightmodefilter;
 			break;
@@ -407,6 +462,11 @@ int check_keys(XEvent *e)
 			x11.show_mouse_cursor(1);
 		else
 			x11.show_mouse_cursor(0);
+		break;
+
+		case XK_r:
+		wasdvar = wasdtoggle();
+    	gl.show_toggle = !gl.show_toggle;
 		break;
 
 		case XK_f:
@@ -468,9 +528,6 @@ void buildAsteroidFragment(Asteroid *ta, Asteroid *a)
 	ta->pos[2] = 0.0f;
 	ta->angle = 0.0;
 	//ta->rotate = a->rotate + (rnd() * 4.0 - 2.0);
-	ta->color[0] = 0.8;
-	ta->color[1] = 0.8;
-	ta->color[2] = 0.7;
 	ta->vel[0] = a->vel[0] + (rnd()*1.0-0.5);
 	ta->vel[1] = a->vel[1] + (rnd()*1.0-0.5);
 	//std::cout << "frag" << std::endl;
@@ -489,14 +546,13 @@ void checkShipAsteroidCollision() {
         // Check if the distance is less than the sum of the ship's and asteroid's radii
         if (distance < g.ship.radius + a->radius) {
             // Collision detected, display "GAME OVER" and exit
-            displayGameOver();
+        	usleep(2000000); // 3 seconds
+			displayGameOver();
             exit(0);
         }
-
         a = a->next;
     }
 }
-
 //----------------------------------------------------------------------------------------------------//
 void moveSmallAsteroidsTowardsShip() {
     Asteroid *a = g.ahead;
@@ -507,7 +563,7 @@ void moveSmallAsteroidsTowardsShip() {
         Flt dist = sqrt(d0 * d0 + d1 * d1);
 
         // Define a minimum distance for small asteroids to start following the ship
-        const Flt MIN_FOLLOW_DISTANCE = 75.0;
+        const Flt MIN_FOLLOW_DISTANCE = 130.0;
 
         // If the asteroid is small and close enough to the ship, move towards the ship
         if (a->radius < MINIMUM_ASTEROID_SIZE && dist < MIN_FOLLOW_DISTANCE) {
@@ -547,7 +603,7 @@ void physics()
 		g.ship.pos[1] -= (float)gl.yres;
 	}
 
-	if (g.nasteroids == 10) {
+	if (g.nasteroids == 8) {
         // Set the gameWon flag to true
         gameWon = true;
     }
@@ -682,7 +738,7 @@ void physics()
 	if (gl.keys[XK_Up]) {
 		//apply thrust
 		//convert ship angle to radians
-		Flt rad = ((g.ship.angle+30.0) / 360.0f) * PI * 2.0;		
+		Flt rad = ((g.ship.angle+90.0) / 360.0f) * PI * 2.0;		
 		//convert angle to a vector
 		Flt xdir = cos(rad);
 		Flt ydir = sin(rad);
@@ -748,12 +804,12 @@ void render()
 	Rect r;
 	glClear(GL_COLOR_BUFFER_BIT);
 	//
-	r.bot = gl.yres - 20;
+	r.bot = gl.yres - 30;
 	r.left = 10;
 	r.center = 0;
-	ggprint8b(&r, 16, 0x00ff0000, "Copyright Onslaught");
-	ggprint8b(&r, 16, 0x00ffff00, "n bullets: %i", g.nbullets);
-	ggprint8b(&r, 16, 0x00ffff00, "Number of Enemies: %i", g.nasteroids);
+	ggprint16(&r, 16, 0x00ff0000, "Copyright Onslaught");
+	ggprint16(&r, 16, 0x00ffff00, "n bullets: %i", g.nbullets);
+	ggprint16(&r, 16, 0x00ffff00, "Number of Enemies: %i", g.nasteroids);
 
 	if (gameWon) {
         displayYouWin(); // Display "You Win" screen
@@ -764,9 +820,9 @@ void render()
 		nightmodefilter(gl.xres, gl.yres);
 	}
 
-	if (gl.show_name){
+	if (gl.show_toggle){
 		display_border(gl.xres, gl.yres);
-		display_name(10, 100);
+		display_toggle(10, 100);
 	}
 		//-------------------------------------------------------------------------
 	//Draw the ship
@@ -833,7 +889,7 @@ void render()
             glVertex2f(x, y);
         }
         glEnd();
-		glLineWidth(1.0f); // Reset line width to its default value
+	    glLineWidth(1.0f); // Reset line width to its default value
 
         // Fill the hexagon with grey color
         glColor3f(0.6, 0.1, 0.1);  // Grey fill color

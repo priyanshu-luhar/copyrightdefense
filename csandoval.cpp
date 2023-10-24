@@ -17,6 +17,9 @@ extern Global gl;
 extern X11_wrapper x11;
 
 
+
+
+int total_running_time
 void handleMenu() {
     int menuChoice = 0;
     bool inMenu = true;
@@ -33,6 +36,10 @@ void handleMenu() {
         ggprint16(&r, 60, 0x00ffffff, "Copyright Onslaught!");  // Increase font size to 60
         r.bot -= 60;  // Adjust the vertical spacing
 
+        // // Display menu options with larger fonts
+        // ggprint8b(&r, 24, 0x00ffffff, "Main Menu");  // Increase font size to 24
+        // r.bot -= 40;  // Adjust the vertical spacing
+
         if (menuChoice == 0)
             ggprint8b(&r, 24, 0x00ff0000, "> Start Game");  // Increase font size to 24
         else
@@ -41,9 +48,9 @@ void handleMenu() {
         r.bot -= 20;  // Adjust the vertical spacing
 
         if (menuChoice == 1)
-            ggprint8b(&r, 24, 0x00ff0000, "> Credits");  // Increase font size to 24
+            ggprint8b(&r, 24, 0x00ff0000, "> Options");  // Increase font size to 24
         else
-            ggprint8b(&r, 24, 0x00ffffff, "Credits");  // Increase font size to 24
+            ggprint8b(&r, 24, 0x00ffffff, "Options");  // Increase font size to 24
 
         r.bot -= 20;  // Adjust the vertical spacing
 
@@ -64,7 +71,8 @@ void handleMenu() {
                     if (menuChoice == 0) {
                         inMenu = false;  // Start the game
                     } else if (menuChoice == 1) {
-                        // Example: inCredits = true;
+                        // Open Options menu (customize this part)
+                        // Example: inOptions = true;
                     } else if (menuChoice == 2) {
                         // Quit the game
                         exit(0);
@@ -152,12 +160,17 @@ void display_border(int xres, int yres)
 	glPopMatrix();
 }
 
-void display_name(int x, int y)
+void display_toggle(int x, int y)
 {
 	// Show's the name listed in  ggprint8b on the side of the screen
 	Rect r;
 	r.bot = y;
 	r.left = x;
 	r.center = 0;
-    ggprint8b(&r, 0, 0xFFFFFFF, "Player");
+    ggprint8b(&r, 16, 0xFFFFFFF, "WASD Toggled");
 }	
+
+//Background will be a screenshoted grass field with some details
+//Ship will be a Megaman sprite 
+//Galaga Style ship will be a 2x barrel buff
+//

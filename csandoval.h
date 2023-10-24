@@ -5,7 +5,7 @@
 //carlos's project files
 
 //called from main program.
-extern void display_name(int, int);
+extern void display_toggle(int, int);
 extern void display_border(int, int);
 extern void nightmodefilter(int, int);
 extern void handleMenu();
@@ -15,7 +15,7 @@ extern void checkShipAsteroidCollision();
 class Global {
 public:
 	int xres, yres;
-	int show_name;
+	int show_toggle;
 	int nightmodefilter;
 	int renderMenu;
 	char keys[65536];
@@ -24,7 +24,7 @@ public:
 		xres = 700;
 		yres = 540;
 		memset(keys, 0, 65536);
-		show_name = 0;
+		show_toggle = 0;
 		nightmodefilter = 0;
 		mouse = 0;
 		renderMenu = 0;
