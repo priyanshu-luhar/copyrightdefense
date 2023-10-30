@@ -33,7 +33,7 @@ const float timeslice = 1.0f;
 const float gravity = 2.2f;
 #define PI 3.141592653589793
 #define ALPHA 1
-const int MAX_BULLETS = 4;
+const int MAX_BULLETS = 10;
 const Flt MINIMUM_ASTEROID_SIZE = 40.0;
 const float MINIMUM_ASTEROID_DISTANCE = 200.0; // Adjust this value as needed 
 //-----------------------------------------------------------------------------
@@ -63,11 +63,8 @@ Global gl;
 X11_wrapper x11(gl.xres, gl.yres);
 bool gameWon = false;
 bool wasdvar = false;
-int render_calls = 0;
-int physics_calls = 0;
-int psavex = 0;
-int psavey = 0;
-
+int physics_function_counter = 0;
+time_t gameStartTime;
 
 //-----------------------------------------------------------------------------
 //Class Definitions
@@ -80,7 +77,6 @@ public:
 	float angle;
 	float color[3];
 	float radius; // Add this line
-    bool doubleBarrelActive;
 public:
 	Ship() {
 		pos[0] = (Flt)(gl.xres/2);
@@ -195,9 +191,8 @@ public:
 //==========================================================================
 // M A I N
 //==========================================================================
-int main()
-{
-    time_since_mouse_move(false);    
+int main(){
+    
 	logOpen();
 	init_opengl();
 	srand(time(NULL));
@@ -207,12 +202,12 @@ int main()
 
 	bool inMenu = true;
 	int done = 0;
+	gameStartTime = time(NULL);
 
 	while (!done) {
         while (x11.getXPending()) {
             XEvent e = x11.getXNextEvent();
             x11.check_resize(&e);
-            check_mouse(&e);
             done = check_keys(&e);
         }
 		
@@ -281,6 +276,7 @@ void check_mouse(XEvent *e)
 	static int savex = 0;
 	static int savey = 0;
 	//
+	static int ct=0;
 	//std::cout << "m" << std::endl << std::flush;
 	if (e->type == ButtonRelease) {
 		return;
@@ -325,15 +321,9 @@ void check_mouse(XEvent *e)
 	//keys[XK_Up] = 0;
 	if (savex != e->xbutton.x || savey != e->xbutton.y) {
 		//Mouse moved
-        time_since_mouse_move(false);
-        //
-        /*
 		int xdiff = savex - e->xbutton.x;
 		int ydiff = savey - e->xbutton.y;
-	    */
-        mouse_movement_distance(e->xbutton.x, e->xbutton.y, false);
-		/*
-        if (++ct < 10)
+		if (++ct < 10)
 			return;		
 		//std::cout << "savex: " << savex << std::endl << std::flush;
 		//std::cout << "e->xbutton.x: " << e->xbutton.x << std::endl <<
@@ -373,35 +363,53 @@ void check_mouse(XEvent *e)
 		x11.set_mouse_position(100,100);
 		savex = 100;
 		savey = 100;
-        */
 	}
 }
 
 int check_keys(XEvent *e)
 {
-	static int shift=0;
-	if (e->type != KeyRelease && e->type != KeyPress) {
-		//not a keyboard event
-		return 0;
-	}
-	int key = (XLookupKeysym(&e->xkey, 0) & 0x0000ffff);
-	//Log("key: %i\n", key);
-	key = wasd(key);
+    static int shift = 0;
+    static bool controlPressed = false;
+    static bool sPressed = false;
 
-	if (e->type == KeyRelease) {
-		gl.keys[key] = 0;
-		if (key == XK_Shift_L || key == XK_Shift_R)
-			shift = 0;
-		return 0;
-	}
-	if (e->type == KeyPress) {
-		//std::cout << "press" << std::endl;
-		gl.keys[key]=1;
-		if (key == XK_Shift_L || key == XK_Shift_R) {
-			shift = 1;
-			return 0;
-		}
-	}
+    int key = (XLookupKeysym(&e->xkey, 0));
+    key = wasd(key);
+
+//Written by Carlos
+    if (e->type == KeyRelease) {
+        gl.keys[key] = 0;
+        if (key == XK_Shift_L || key == XK_Shift_R) {
+            shift = 0;
+        }
+        if (key == XK_Control_L) {
+            controlPressed = false;
+        }
+        if (key == XK_s) {
+            sPressed = false;
+        }
+        return 0;
+    }
+    if (e->type == KeyPress) {
+        gl.keys[key] = 1;
+        if (key == XK_Shift_L || key == XK_Shift_R) {
+            shift = 1;
+        }
+		if (key == XK_s) {
+            sPressed = true;
+        }
+        if (key == XK_Control_L) {
+            controlPressed = true;
+        }
+    }
+//Written by Carlos
+
+    // Check if both Control and s keys are pressed
+    if ((sPressed && controlPressed) || (controlPressed && sPressed)) {
+        gl.statistics = !gl.statistics;
+        controlPressed = false;
+        sPressed = false;
+    }
+
 	(void)shift;
 	switch (key) {
 		case XK_Escape:
@@ -423,13 +431,7 @@ int check_keys(XEvent *e)
 		wasdvar = wasdtoggle();
     	gl.show_toggle = !gl.show_toggle;
 		break;
-
-		case XK_f:
-		gl.statistics = !gl.statistics;
-			break;
-			
-		case XK_s:
-			break;
+		
 		case XK_Down:
 			break;
 		case XK_equal:
@@ -491,7 +493,7 @@ void buildAsteroidFragment(Asteroid *ta, Asteroid *a)
 }
 
 
-//----------------------------------------------------------------------------------------------------//
+//Written by Carlos----------------------------------------------------------------------------------------------------//
 void checkShipAsteroidCollision() {
     Asteroid *a = g.ahead;
     while (a) {
@@ -510,7 +512,7 @@ void checkShipAsteroidCollision() {
         a = a->next;
     }
 }
-//----------------------------------------------------------------------------------------------------//
+
 void moveSmallAsteroidsTowardsShip() {
     Asteroid *a = g.ahead;
     while (a) {
@@ -538,11 +540,11 @@ void moveSmallAsteroidsTowardsShip() {
         a = a->next;
     }
 }
-//----------------------------------------------------------------------------------------------------//
+//Written by Carlos----------------------------------------------------------------------------------------------------//
 
 void physics()
 {
-    physics_calls++;
+	physics_function_counter++;
 	Flt d0,d1,dist;
 	//Update ship position
 	g.ship.pos[0] += g.ship.vel[0];
@@ -561,10 +563,6 @@ void physics()
 		g.ship.pos[1] -= (float)gl.yres;
 	}
 
-	if (g.nasteroids == 8) {
-        // Set the gameWon flag to true
-        gameWon = true;
-    }
 	//
 	//
 	//Update bullet positions
@@ -630,7 +628,8 @@ void physics()
 	//     2. break the asteroid into pieces
 	//        if asteroid small, delete it
 	a = g.ahead;
-	while (a) {
+	while (a) 
+	{
 		//is there a bullet within its radius?
 		int i=0;
 		while (i < g.nbullets) {
@@ -679,7 +678,57 @@ void physics()
 		if (a == NULL)
 			break;
 		a = a->next;
-	}
+
+//Written by Carlos----------------------------------------------------------------------------------------------------//
+		// Check if asteroid count is below 9
+		if (g.nasteroids < 9) {
+			// Spawn another wave of asteroids
+			for (int j = 0; j < 10; j++) {
+				Asteroid *a = new Asteroid;
+				a->nverts = 6;
+				a->radius = rnd() * 20.0 + 40.0;
+				a->angle = 0.0f;
+				a->color[0] = 1.0;
+				a->color[1] = 1.0;
+				a->color[2] = 1.0;
+
+				a->vel[0] = (Flt)(rnd() * 2.0 - 1.0);
+				a->vel[1] = (Flt)(rnd() * 2.0 - 1.0);
+
+				int side = random(4);
+				if (side == 0) {
+					a->pos[0] = 0.0f;
+					a->pos[1] = rnd() * (float)gl.yres;
+				} else if (side == 1) {
+					a->pos[0] = rnd() * (float)gl.xres;
+					a->pos[1] = (float)gl.yres;
+				} else if (side == 2) {
+					a->pos[0] = (float)gl.xres;
+					a->pos[1] = rnd() * (float)gl.yres;
+				} else {
+					a->pos[0] = rnd() * (float)gl.xres;
+					a->pos[1] = 0.0f;
+				}
+
+				a->next = g.ahead;
+				if (g.ahead != NULL) {
+					g.ahead->prev = a;
+				}
+				g.ahead = a;
+				++g.nasteroids;
+			}
+		}
+
+	time_t currentTime = time(NULL);
+
+    // Check if 90 seconds have passed
+    if (currentTime - gameStartTime >= 90) {
+        gameWon = true;
+        displayYouWin();
+        return; // Exit the function to stop the game
+    }	
+}
+//Written by Carlos----------------------------------------------------------------------------------------------------//
 
 	//---------------------------------------------------
 	//check keys pressed now
@@ -759,16 +808,19 @@ void physics()
 
 void render()
 {
-    render_calls++;
 	Rect r;
 	glClear(GL_COLOR_BUFFER_BIT);
 	//
+	
+	
+
 	r.bot = gl.yres - 30;
 	r.left = 10;
 	r.center = 0;
 	ggprint16(&r, 16, 0x00ff0000, "Copyright Onslaught");
-	ggprint16(&r, 16, 0x00ffff00, "n bullets: %i", g.nbullets);
+	ggprint16(&r, 16, 0x00ffff00, "Number of bullets: %i", g.nbullets);
 	ggprint16(&r, 16, 0x00ffff00, "Number of Enemies: %i", g.nasteroids);
+	
 
 	if (gameWon) {
         displayYouWin(); // Display "You Win" screen
@@ -801,17 +853,10 @@ void render()
 		r.left = 28;
 		r.center = 0;
 		ggprint13(&r, 20, 0x0055ff55, "Statistics...");
-		ggprint13(&r, 16, 0x0055ff55, "sec_running_time:  %i", 
+		ggprint13(&r, 16, 0x00ffff00, "sec_running_time: %i", 
 									total_running_time(true));
-		ggprint13(&r, 16, 0x0055ff55, "sec since mouse move:  %i", 
-									time_since_mouse_move(true));
-		ggprint13(&r, 16, 0x0055ff55, "Mouse Distance:  %lf", 
-									mouse_movement_distance(-1, -1, true));
-		ggprint13(&r, 16, 0x0055ff55, "N Render Calls:  %i", 
-									total_render_function_calls(true));
-		ggprint13(&r, 16, 0x0055ff55, "N Physics Calls:  %i", 
+		ggprint13(&r, 16, 0x00ffff00, "n_physics_function_calls: %i", 
 									total_physics_function_calls(true));
-		// ggprint13(&r. 16, 0x0055ff55, "n_physics_function_calls:  %i"), total_physics_function_calls(true);
 	}
 	
 	
@@ -871,7 +916,6 @@ void render()
         glColor3f(1.0, 0.5, 0.0);  // Orange outline color
 		glLineWidth(5.0f); // You can adjust this value to make the outline thicker		
 
-
         // Draw a hexagon
         glBegin(GL_LINE_LOOP);
         for (int j = 0; j < 6; j++) {
@@ -883,8 +927,8 @@ void render()
         glEnd();
 	    glLineWidth(1.0f); // Reset line width to its default value
 
-        // Fill the hexagon with grey color
-        glColor3f(0.6, 0.1, 0.1);  // Grey fill color
+        // Fill the hexagon with a dark color
+        glColor3f(0.2, 0.1, 0.1);  // dark fill color
         glBegin(GL_POLYGON);
         for (int j = 0; j < 6; j++) {
             float angle = 2.0f * 3.1415926f * j / 6.0f;
@@ -893,8 +937,6 @@ void render()
             glVertex2f(x, y);
         }
         glEnd();
-
-		
         glPopMatrix();
         a = a->next;
     }
@@ -904,14 +946,14 @@ void render()
 	for (int i=0; i<g.nbullets; i++) {
 		Bullet *b = &g.barr[i];
 		//Log("draw bullet...\n");
-		glColor3f(1.0, 1.0, 0.0);
+		glColor3f(0.4, 0.2, 1.0);
 		glBegin(GL_POINTS);
 		glVertex2f(b->pos[0],      b->pos[1]);
 		glVertex2f(b->pos[0]-1.0f, b->pos[1]);
 		glVertex2f(b->pos[0]+1.0f, b->pos[1]);
 		glVertex2f(b->pos[0],      b->pos[1]-1.0f);
 		glVertex2f(b->pos[0],      b->pos[1]+1.0f);
-		glColor3f(0.8, 0.8, 0.8);
+		glColor3f(0.8, 0.1, 0.8);
 		glVertex2f(b->pos[0]-1.0f, b->pos[1]-1.0f);
 		glVertex2f(b->pos[0]-1.0f, b->pos[1]+1.0f);
 		glVertex2f(b->pos[0]+1.0f, b->pos[1]-1.0f);

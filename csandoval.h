@@ -10,8 +10,11 @@ extern void display_border(int, int);
 extern void nightmodefilter(int, int);
 extern void handleMenu();
 extern void checkShipAsteroidCollision();
+
 extern int total_running_time(const bool);
-// extern int total_physics_function_calls(const int);
+extern int total_physics_function_calls(bool temp);
+extern int physics_function_counter;
+
 
 class Global {
 public:
@@ -22,6 +25,7 @@ public:
 	char keys[65536];
 	int mouse;
 	bool statistics;
+	
 	Global() {
 		xres = 700;
 		yres = 540;
