@@ -55,38 +55,38 @@ int wasd(int key)
    }
    */
 
-int total_render_function_calls(bool temp)
-{
-    if (temp) {
-        return render_calls;
-    }
+// int total_render_function_calls(bool temp)
+// {
+//     if (temp) {
+//         return render_calls;
+//     }
 
-    return 0;
-}
+//     return 0;
+// }
 
-int total_physics_function_calls(bool temp)
-{
-    if (temp) {
-        return physics_calls;
-    }
+// int total_physics_function_calls(bool temp)
+// {
+//     if (temp) {
+//         return physics_calls;
+//     }
 
-    return 0;
-}
+//     return 0;
+// }
 
-double mouse_movement_distance(int x, int y, bool temp)
-{
-       int xdist = abs(psavex - x);
-       int ydist = abs(psavey - y);
+// double mouse_movement_distance(int x, int y, bool temp)
+// {
+//        int xdist = abs(psavex - x);
+//        int ydist = abs(psavey - y);
 
-    if (temp) {
-        double total_distance;
-        total_distance = (xdist*xdist) + (ydist*ydist);
-        total_distance = sqrt(total_distance);
-        return total_distance;
-    } else {
-        psavex = x;
-        psavey = y;
-    }
+//     if (temp) {
+//         double total_distance;
+//         total_distance = (xdist*xdist) + (ydist*ydist);
+//         total_distance = sqrt(total_distance);
+//         return total_distance;
+//     } else {
+//         psavex = x;
+//         psavey = y;
+//     }
 
-    return 0;
-}
+//     return 0;
+// }
