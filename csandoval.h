@@ -105,7 +105,7 @@ public:
 	void set_title() {
 		//Set the window title bar.
 		XMapWindow(dpy, win);
-		XStoreName(dpy, win, "Asteroids Template");
+		XStoreName(dpy, win, "Copyright Onslaught!");
 	}
 	void check_resize(XEvent *e) {
 		//The ConfigureNotify is sent by the
