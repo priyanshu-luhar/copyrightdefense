@@ -94,7 +94,6 @@ void handleMenu() {
 
         glPopMatrix();
         x11.swapBuffers();
-
         // Handle menu input
         XEvent e;
         while (XCheckWindowEvent(x11.dpy, x11.win, KeyPressMask, &e)) {
