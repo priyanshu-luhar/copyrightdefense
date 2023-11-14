@@ -585,7 +585,7 @@ void moveSmallAsteroidsTowardsShip() {
             Flt dirY = d1 / dist;
 
             // Define the speed at which small asteroids follow the ship
-            const Flt FOLLOW_SPEED = 0.3;
+            const Flt FOLLOW_SPEED = 0.4;
 
             // Update the asteroid's velocity to follow the ship
             a->vel[0] = dirX * FOLLOW_SPEED;
@@ -622,25 +622,9 @@ void resetGame() {
 
         bool validPosition = false;
         while (!validPosition) {
-            // Randomly select an edge to spawn the asteroid on
-            int side = random(4);
-            if (side == 0) {
-                // Spawn on the left edge
-                a->pos[0] = 0.0f;
-                a->pos[1] = rnd() * (float)gl.yres;
-            } else if (side == 1) {
-                // Spawn on the top edge
-                a->pos[0] = rnd() * (float)gl.xres;
-                a->pos[1] = (float)gl.yres;
-            } else if (side == 2) {
-                // Spawn on the right edge
-                a->pos[0] = (float)gl.xres;
-                a->pos[1] = rnd() * (float)gl.yres;
-            } else {
-                // Spawn on the bottom edge
-                a->pos[0] = rnd() * (float)gl.xres;
-                a->pos[1] = 0.0f;
-            }
+            // Randomly select a position for the asteroid
+            a->pos[0] = rnd() * (float)gl.xres;
+            a->pos[1] = rnd() * (float)gl.yres;
 
             // Check if the asteroid is too close to the ship
             Flt d0 = a->pos[0] - g.ship.pos[0];
@@ -823,7 +807,7 @@ void physics()
         a = a->next;
 
         //Written by Carlos----------------------------------------------------------------------------------------------------//
-        // Check if asteroid count is below 9
+        // Check if asteroid count is below 10
         if (g.nasteroids < 10) {
             // Spawn another wave of asteroids
             for (int j = 0; j < 10; j++) {
