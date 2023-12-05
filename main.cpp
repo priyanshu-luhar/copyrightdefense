@@ -35,7 +35,7 @@ const float timeslice = 1.0f;
 const float gravity = 2.2f;
 #define PI 3.141592653589793
 #define ALPHA 1
-const int MAX_BULLETS = 10;
+const int MAX_BULLETS = 5;
 const Flt MINIMUM_ASTEROID_SIZE = 40.0;
 const float MINIMUM_ASTEROID_DISTANCE = 400.0; 
 // Adjust this value as needed 
