@@ -18,7 +18,7 @@
 
 
 extern  Global gl;
-
+extern Game g;
 extern  X11_wrapper x11;
 
 //----------------------------------------------------------------------------------------------------//
@@ -225,6 +225,113 @@ void display_toggle(int x, int y)
     ggprint8b(&r, 16, 0xFFFFFFF, "WASD Toggled");
 }	
 //----------------------------------------------------------------------------------------------------//
-//Background will be a screenshoted grass field with some details
-//Ship will be a Megaman sprite 
-//Galaga Style ship will be a 2x barrel buff
+void checkShipAsteroidCollision() {
+    Asteroid *a = g.ahead;
+    while (a) {
+        // Calculate the distance between the ship and the asteroid
+        float d0 = g.ship.pos[0] - a->pos[0];
+        float d1 = g.ship.pos[1] - a->pos[1];
+        float distance = sqrt(d0 * d0 + d1 * d1);
+
+        if (distance < g.ship.radius + a->radius) {
+            Lives--;
+            // If Lives reach 0, display Game Over and end game loop, until then, reset the game and continue
+            if (Lives == 0) {
+                usleep(3000000);
+                displayGameOver();
+            } else {
+                usleep(2000000);
+                displayYouDied();
+                resetGame();
+            }
+        }
+        a = a->next;
+    }
+}
+//----------------------------------------------------------------------------------------------------//
+void moveSmallAsteroidsTowardsShip() {
+    Asteroid *a = g.ahead;
+    while (a) {
+        // Calculate the distance between the asteroid and the ship
+        Flt d0 = g.ship.pos[0] - a->pos[0];
+        Flt d1 = g.ship.pos[1] - a->pos[1];
+        Flt dist = sqrt(d0 * d0 + d1 * d1);
+
+        // Define a minimum distance for small asteroids to start following the ship
+        const Flt MIN_FOLLOW_DISTANCE = 130.0;
+
+        // If the asteroid is small and close enough to the ship, move towards the ship
+        if (a->radius < MINIMUM_ASTEROID_SIZE && dist < MIN_FOLLOW_DISTANCE) {
+            // Normalize the direction vector towards the ship
+            Flt dirX = d0 / dist;
+            Flt dirY = d1 / dist;
+
+            // Define the speed at which small asteroids follow the ship
+            const Flt FOLLOW_SPEED = 0.4;
+
+            // Update the asteroid's velocity to follow the ship
+            a->vel[0] = dirX * FOLLOW_SPEED;
+            a->vel[1] = dirY * FOLLOW_SPEED;
+        }
+        a = a->next;
+    }
+}
+//----------------------------------------------------------------------------------------------------//
+void resetGame() {
+    g.ship = Ship(); // Reset the ship
+    g.nasteroids = 0;
+    g.nbullets = 0;
+    g.mouseThrustOn = false;
+    g.ahead = NULL;
+    g.bulletTimer.tv_sec = 0;
+    g.bulletTimer.tv_nsec = 0;
+    gameWon = false;
+    countdown = 90; // Reset the countdown to 90
+    gameStartTime = time(NULL);
+
+    // Initialize the asteroids again
+    while (g.ahead != NULL) {
+        Asteroid *temp = g.ahead;
+        g.ahead = g.ahead->next;
+        delete temp;
+    }
+    g.ahead = NULL;
+    
+    for (int j = 0; j < 10; j++) {
+        Asteroid *a = new Asteroid;
+        a->nverts = 6;
+        a->radius = rnd() * 20.0 + 40.0;
+        a->angle = 0.0f;
+        a->color[0] = 0.8;
+        a->color[1] = 0.8;
+        a->color[2] = 0.7;
+
+        a->vel[0] = (Flt)(rnd() * 2.0 - 1.0);
+        a->vel[1] = (Flt)(rnd() * 2.0 - 1.0);
+
+        bool validPosition = false;
+        while (!validPosition) {
+            // Randomly select a position for the asteroid
+            a->pos[0] = rnd() * (float)gl.xres;
+            a->pos[1] = rnd() * (float)gl.yres;
+
+            // Check if the asteroid is too close to the ship
+            Flt d0 = a->pos[0] - g.ship.pos[0];
+            Flt d1 = a->pos[1] - g.ship.pos[1];
+            Flt distance = sqrt(d0 * d0 + d1 * d1);
+
+            if (distance >= MINIMUM_ASTEROID_DISTANCE) {
+                // Asteroid is far enough from the ship, consider it a valid position
+                validPosition = true;
+            }
+        }
+
+        // Add to front of linked list
+        a->next = g.ahead;
+        if (g.ahead != NULL) {
+            g.ahead->prev = a;
+        }
+        g.ahead = a;
+        ++g.nasteroids;
+    }
+}
