@@ -140,7 +140,7 @@ Game::Game() {
                 // Spawn on the bottom edge
                 a->pos[0] = rnd() * (float)gl.xres;
                 a->pos[1] = 0.0f;
-            
+            }
             // Check if the asteroid is too close to the ship
             Flt d0 = a->pos[0] - ship.pos[0];
             Flt d1 = a->pos[1] - ship.pos[1];
