@@ -9,6 +9,7 @@
 extern int total_running_time(const bool);
 extern int time_since_mouse_move(const bool);
 extern void play_sound(int);
+extern void coins_buffs(int);
 /*
 class Global {
     public: 
