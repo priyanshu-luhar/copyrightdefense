@@ -1408,7 +1408,7 @@ void render()
             glEnd();
 
             glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
-            wid = 0.7f * (float)a->radius;
+            wid = 0.9f * (float)a->radius;
             glColor4f(1.0, 1.0, 1.0, 1.0);
 
             glBindTexture(GL_TEXTURE_2D, gl.enemyTexture);
