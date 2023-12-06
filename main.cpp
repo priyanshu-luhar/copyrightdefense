@@ -1090,13 +1090,27 @@ void physics()
                     for (int i = 0; i < 3; i++) {
                       Bullet *b = &g.barr[g.nbullets];
                       timeCopy(&b->time, &bt);
-                      if (i = 1)
-                        b->pos[0] = g.ship.pos[0] - 10;
-                      else if (i = 2)
-                        b->pos[0] = g.ship.pos[0] + 10;
-                      else
-                        b->pos[0] = g.ship.pos[0];
-                      b->pos[1] = g.ship.pos[1];
+                      if (g.ship.angle == 180 || g.ship.angle == 360) {
+                          if (i == 1)
+                              b->pos[0] = g.ship.pos[0] - 10;
+                          else if (i == 2)
+                              b->pos[0] = g.ship.pos[0] + 10;
+                          else
+                              b->pos[0] = g.ship.pos[0];
+
+                          b->pos[1] = g.ship.pos[1];
+                      }
+                      if (g.ship.angle == 90 || g.ship.angle == 270) {
+                          if (i == 1)
+                              b->pos[1] = g.ship.pos[1] - 10;
+                          else if (i == 2)
+                              b->pos[1] = g.ship.pos[1] + 10;
+                          else
+                              b->pos[1] = g.ship.pos[1];
+
+                          b->pos[0] = g.ship.pos[0];
+                      }
+
                       b->vel[0] = g.ship.vel[0];
                       b->vel[1] = g.ship.vel[1];
                     
