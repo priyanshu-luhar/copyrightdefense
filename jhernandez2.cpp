@@ -152,11 +152,11 @@ void coins_buffs(int coins)
         speedrate = speedrate + 0.5;
     }
 
-    if (coins >= 10 && flag1 == false) {
+    if (coins >= 5 && flag1 == false) {
         flag1 = true;
         MAX_BULLETS = 10;
     }
-    if (coins >= 20 && flag2 == false) {
+    if (coins >= 10 && flag2 == false) {
         flag2 = true;
         shotgun_mode = true;
         // return 1;
