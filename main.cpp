@@ -1087,55 +1087,35 @@ void physics()
                 //shoot a bullet...
                 //Bullet *b = new Bullet;
                 if (shotgun_mode == true) {
-                    Bullet *b = &g.barr[g.nbullets];
-                    Bullet *b1 = &g.barr[g.nbullets];
-                    Bullet *b2 = &g.barr[g.nbullets];
-                    timeCopy(&b->time, &bt);
-                    b->pos[0] = g.ship.pos[0];
-                    b->pos[1] = g.ship.pos[1];
-                    b->vel[0] = g.ship.vel[0];
-                    b->vel[1] = g.ship.vel[1];
+                    for (int i = 0; i < 3; i++) {
+                      Bullet *b = &g.barr[g.nbullets];
+                      timeCopy(&b->time, &bt);
+                      if (i = 1)
+                        b->pos[0] = g.ship.pos[0] - 10;
+                      else if (i = 2)
+                        b->pos[0] = g.ship.pos[0] + 10;
+                      else
+                        b->pos[0] = g.ship.pos[0];
+                      b->pos[1] = g.ship.pos[1];
+                      b->vel[0] = g.ship.vel[0];
+                      b->vel[1] = g.ship.vel[1];
                     
-                    b1->pos[0] = g.ship.pos[0] - 10;
-                    b1->pos[1] = g.ship.pos[1];
-                    b1->vel[0] = g.ship.vel[0];
-                    b1->vel[1] = g.ship.vel[1];
-                    
-                    b2->pos[0] = g.ship.pos[0] + 10;
-                    b2->pos[1] = g.ship.pos[1];
-                    b2->vel[0] = g.ship.vel[0];
-                    b2->vel[1] = g.ship.vel[1];
-                    
-                    //convert ship angle to radians
-                    Flt rad = ((g.ship.angle+90.0) / 360.0f) * PI * 2.0;
-                    //convert angle to a vector
-                    Flt xdir = cos(rad);
-                    Flt ydir = sin(rad);
+                      //convert ship angle to radians
+                      Flt rad = ((g.ship.angle+90.0) / 360.0f) * PI * 2.0;
+                      //convert angle to a vector
+                      Flt xdir = cos(rad);
+                      Flt ydir = sin(rad);
 
-                    b->pos[0] += xdir*20.0f;
-                    b->pos[1] += ydir*20.0f;
-                    b->vel[0] += xdir*6.0f + rnd()*0.1;
-                    b->vel[1] += ydir*6.0f + rnd()*0.1;
-                    b->color[0] = 1.0f;
-                    b->color[1] = 1.0f;
-                    b->color[2] = 1.0f;
+                      b->pos[0] += xdir*20.0f;
+                      b->pos[1] += ydir*20.0f;
+                      b->vel[0] += xdir*6.0f + rnd()*0.1;
+                      b->vel[1] += ydir*6.0f + rnd()*0.1;
+                      b->color[0] = 1.0f;
+                      b->color[1] = 1.0f;
+                      b->color[2] = 1.0f;
 
-                    b1->pos[0] += xdir*20.0f;
-                    b1->pos[1] += ydir*20.0f;
-                    b1->vel[0] += xdir*6.0f + rnd()*0.1;
-                    b1->vel[1] += ydir*6.0f + rnd()*0.1;
-                    b1->color[0] = 1.0f;
-                    b1->color[1] = 1.0f;
-                    b1->color[2] = 1.0f;
-
-                    b2->pos[0] += xdir*20.0f;
-                    b2->pos[1] += ydir*20.0f;
-                    b2->vel[0] += xdir*6.0f + rnd()*0.1;
-                    b2->vel[1] += ydir*6.0f + rnd()*0.1;
-                    b2->color[0] = 1.0f;
-                    b2->color[1] = 1.0f;
-                    b2->color[2] = 1.0f;
-                    g.nbullets++;
+                      g.nbullets++;
+                    }
                 }
                 else {
                     Bullet *b = &g.barr[g.nbullets];
