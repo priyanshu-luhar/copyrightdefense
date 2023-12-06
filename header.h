@@ -59,6 +59,14 @@ public:
     Asteroid();
 };
 
+class Coin {
+public:
+    Vec pos;
+    float radius;
+    bool active;
+    Coin();
+};
+
 class Game {
 public:
     Ship ship;
@@ -69,9 +77,14 @@ public:
     struct timespec bulletTimer;
     struct timespec mouseThrustTimer;
     bool mouseThrustOn;
+    Coin coins[5]; 
+    int score;
+    int collectedCoins; 
     Game();
+    void spawnCoin();
     ~Game();
 };
+
 
 class Global {
 public:
