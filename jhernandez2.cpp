@@ -131,6 +131,8 @@ void play_sound(int select)
         alcCloseDevice(Device);
         // return 0;
     }
+    #else
+    if (select == 0) {}
 #endif
 
 }
