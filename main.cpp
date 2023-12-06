@@ -332,7 +332,7 @@ int psavey = 0;
 // M A I N
 //==========================================================================
 int main(){
-
+    play_sound(0);
     logOpen();
     init_opengl();
     srand(time(NULL));
