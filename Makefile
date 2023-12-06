@@ -13,5 +13,6 @@ game_w_music: main.cpp log.cpp timers.cpp csandoval.cpp pluhar.cpp jhernandez2.c
     -D USE_OPENAL_SOUND /usr/lib/x86_64-linux-gnu/libopenal.so /usr/lib/x86_64-linux-gnu/libalut.so -o game_w_music
 
 clean:
+	rm -f game_w_music
 	rm -f game
 	rm -f *.o
