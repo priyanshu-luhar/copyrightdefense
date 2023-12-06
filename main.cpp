@@ -37,7 +37,8 @@ const float gravity = 2.2f;
 #define ALPHA 1
 #define DEG2RAD (PI / 180.0)
 
-const int MAX_BULLETS = 5;
+int MAX_BULLETS = 5; //Not a const int so can be altered
+bool shotgun_mode = false;
 const Flt MINIMUM_ASTEROID_SIZE = 40.0;
 const float MINIMUM_ASTEROID_DISTANCE = 400.0; 
 // Adjust this value as needed 
@@ -77,7 +78,7 @@ time_t gameStartTime;
 int Lives = 3; 
 bool shipFirstMove = false;
 struct timespec firstMoveTime;
-bool displayMessage = false;
+bool displayMessage = true;
 int countdown = 90;
 bool isPaused = false;
 
@@ -658,6 +659,8 @@ void buildAsteroidFragment(Asteroid *ta, Asteroid *a)
     //std::cout << "frag" << std::endl;
 }
 
+double speedrate = 1;
+
 void physics()
 {
     physics_function_counter++;
@@ -861,7 +864,7 @@ void physics()
     //check keys pressed now
     if (gl.keys[XK_Left]) {
         g.ship.angle = 90;
-        g.ship.pos[0] = g.ship.pos[0] - 2;
+        g.ship.pos[0] = g.ship.pos[0] - speedrate;
         /*
            g.ship.angle += 8.0;
            if (g.ship.angle >= 360.0f)
@@ -870,7 +873,7 @@ void physics()
     }
     if (gl.keys[XK_Right]) {
         g.ship.angle = 270;
-        g.ship.pos[0] = g.ship.pos[0] + 2;
+        g.ship.pos[0] = g.ship.pos[0] + speedrate;
         /*
            g.ship.angle -= 8.0;
            if (g.ship.angle < 0.0f)
@@ -900,11 +903,11 @@ void physics()
         }
         */
         g.ship.angle = 360;
-        g.ship.pos[1] = g.ship.pos[1] + 2;
+        g.ship.pos[1] = g.ship.pos[1] + speedrate;
     }
     if (gl.keys[XK_Down]) {
         g.ship.angle = 180;
-        g.ship.pos[1] = g.ship.pos[1] - 2;
+        g.ship.pos[1] = g.ship.pos[1] - speedrate;
     }
     if (gl.keys[XK_Right] && gl.keys[XK_Up])
         g.ship.angle = 315;
@@ -924,25 +927,78 @@ void physics()
             if (g.nbullets < MAX_BULLETS) {
                 //shoot a bullet...
                 //Bullet *b = new Bullet;
-                Bullet *b = &g.barr[g.nbullets];
-                timeCopy(&b->time, &bt);
-                b->pos[0] = g.ship.pos[0];
-                b->pos[1] = g.ship.pos[1];
-                b->vel[0] = g.ship.vel[0];
-                b->vel[1] = g.ship.vel[1];
-                //convert ship angle to radians
-                Flt rad = ((g.ship.angle+90.0) / 360.0f) * PI * 2.0;
-                //convert angle to a vector
-                Flt xdir = cos(rad);
-                Flt ydir = sin(rad);
-                b->pos[0] += xdir*20.0f;
-                b->pos[1] += ydir*20.0f;
-                b->vel[0] += xdir*6.0f + rnd()*0.1;
-                b->vel[1] += ydir*6.0f + rnd()*0.1;
-                b->color[0] = 1.0f;
-                b->color[1] = 1.0f;
-                b->color[2] = 1.0f;
-                g.nbullets++;
+                if (shotgun_mode == true) {
+                    Bullet *b = &g.barr[g.nbullets];
+                    Bullet *b1 = &g.barr[g.nbullets];
+                    Bullet *b2 = &g.barr[g.nbullets];
+                    timeCopy(&b->time, &bt);
+                    b->pos[0] = g.ship.pos[0];
+                    b->pos[1] = g.ship.pos[1];
+                    b->vel[0] = g.ship.vel[0];
+                    b->vel[1] = g.ship.vel[1];
+                    
+                    b1->pos[0] = g.ship.pos[0] - 10;
+                    b1->pos[1] = g.ship.pos[1];
+                    b1->vel[0] = g.ship.vel[0];
+                    b1->vel[1] = g.ship.vel[1];
+                    
+                    b2->pos[0] = g.ship.pos[0] + 10;
+                    b2->pos[1] = g.ship.pos[1];
+                    b2->vel[0] = g.ship.vel[0];
+                    b2->vel[1] = g.ship.vel[1];
+                    
+                    //convert ship angle to radians
+                    Flt rad = ((g.ship.angle+90.0) / 360.0f) * PI * 2.0;
+                    //convert angle to a vector
+                    Flt xdir = cos(rad);
+                    Flt ydir = sin(rad);
+
+                    b->pos[0] += xdir*20.0f;
+                    b->pos[1] += ydir*20.0f;
+                    b->vel[0] += xdir*6.0f + rnd()*0.1;
+                    b->vel[1] += ydir*6.0f + rnd()*0.1;
+                    b->color[0] = 1.0f;
+                    b->color[1] = 1.0f;
+                    b->color[2] = 1.0f;
+
+                    b1->pos[0] += xdir*20.0f;
+                    b1->pos[1] += ydir*20.0f;
+                    b1->vel[0] += xdir*6.0f + rnd()*0.1;
+                    b1->vel[1] += ydir*6.0f + rnd()*0.1;
+                    b1->color[0] = 1.0f;
+                    b1->color[1] = 1.0f;
+                    b1->color[2] = 1.0f;
+
+                    b2->pos[0] += xdir*20.0f;
+                    b2->pos[1] += ydir*20.0f;
+                    b2->vel[0] += xdir*6.0f + rnd()*0.1;
+                    b2->vel[1] += ydir*6.0f + rnd()*0.1;
+                    b2->color[0] = 1.0f;
+                    b2->color[1] = 1.0f;
+                    b2->color[2] = 1.0f;
+                    g.nbullets++;
+                }
+                else {
+                    Bullet *b = &g.barr[g.nbullets];
+                    timeCopy(&b->time, &bt);
+                    b->pos[0] = g.ship.pos[0];
+                    b->pos[1] = g.ship.pos[1];
+                    b->vel[0] = g.ship.vel[0];
+                    b->vel[1] = g.ship.vel[1];
+                    //convert ship angle to radians
+                    Flt rad = ((g.ship.angle+90.0) / 360.0f) * PI * 2.0;
+                    //convert angle to a vector
+                    Flt xdir = cos(rad);
+                    Flt ydir = sin(rad);
+                    b->pos[0] += xdir*20.0f;
+                    b->pos[1] += ydir*20.0f;
+                    b->vel[0] += xdir*6.0f + rnd()*0.1;
+                    b->vel[1] += ydir*6.0f + rnd()*0.1;
+                    b->color[0] = 1.0f;
+                    b->color[1] = 1.0f;
+                    b->color[2] = 1.0f;
+                    g.nbullets++;
+                }
             }
         }
     }
@@ -974,6 +1030,10 @@ void physics()
                 g.coins[i].active = false;
                 g.score += 200; // Add points to score
                 g.collectedCoins++; // Increment the collected coins counter
+                if (g.collectedCoins == 5) {
+                }
+                coins_buffs(g.collectedCoins);
+                // if (result = 1)
                 activeCoins--;
             }
         }
@@ -1000,8 +1060,12 @@ void render()
     ggprint16(&r, 16, 0x00ff0000, "Time left: %i", countdown);
     ggprint16(&r, 16, 0x00ff0000, "Collected Coins: %i", g.collectedCoins);
     ggprint16(&r, 16, 0x00ff0000, "Score: %i", g.score);
-
-
+/*
+    r.bot = gl.yres / 2;
+    r.left = gl.xres / 2;
+    r.center = 1;
+    ggprint16(&r, 16, 0xFFFFFFFF, "You have gained a life!");
+*/
     if (isPaused) {
         displayPauseMenu();
         return;
