@@ -161,7 +161,7 @@ void coins_buffs(int coins)
         shotgun_mode = true;
         // return 1;
     }
-    if (coins >= 30 && flag3 == false) {
+    if (coins >= 11 && flag3 == false) {
         flag3 = true;
         Lives = Lives + 1;
 /*
