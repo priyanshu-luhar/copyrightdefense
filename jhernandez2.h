@@ -8,6 +8,7 @@
 // extern void check_keys();
 extern int total_running_time(const bool);
 extern int time_since_mouse_move(const bool);
+extern void play_sound(int);
 /*
 class Global {
     public: 
