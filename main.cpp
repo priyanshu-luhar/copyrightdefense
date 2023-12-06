@@ -831,22 +831,34 @@ void physics()
     //---------------------------------------------------
     //check keys pressed now
     if (gl.keys[XK_Left]) {
+        g.ship.angle = 90;
+        g.ship.pos[0] = g.ship.pos[0] - 2;
+        /*
         g.ship.angle += 8.0;
         if (g.ship.angle >= 360.0f)
             g.ship.angle -= 360.0f;
+        */
     }
     if (gl.keys[XK_Right]) {
+        g.ship.angle = 270;
+        g.ship.pos[0] = g.ship.pos[0] + 2;
+        /*
         g.ship.angle -= 8.0;
         if (g.ship.angle < 0.0f)
             g.ship.angle += 360.0f;
+        */
     }
     if (gl.keys[XK_Up]) {
         //apply thrust
         //convert ship angle to radians
-        Flt rad = ((g.ship.angle+90.0) / 360.0f) * PI * 2.0;		
+        /*
+        Flt rad = ((g.ship.angle+90.0) / 360.0f) * PI * 2.0;
         //convert angle to a vector
+
         Flt xdir = cos(rad);
         Flt ydir = sin(rad);
+        g.ship.pos[1] = g.ship.pos[1] + 1;
+
         g.ship.vel[0] += xdir*0.01f;
         g.ship.vel[1] += ydir*0.01f;
         Flt speed = sqrt(g.ship.vel[0]*g.ship.vel[0]+
@@ -857,7 +869,22 @@ void physics()
             g.ship.vel[0] *= speed;
             g.ship.vel[1] *= speed;
         }
+        */
+        g.ship.angle = 360;
+        g.ship.pos[1] = g.ship.pos[1] + 2;
     }
+    if (gl.keys[XK_Down]) {
+        g.ship.angle = 180;
+        g.ship.pos[1] = g.ship.pos[1] - 2;
+    }
+    if (gl.keys[XK_Right] && gl.keys[XK_Up])
+        g.ship.angle = 315;
+    if (gl.keys[XK_Left] && gl.keys[XK_Up])
+        g.ship.angle = 45;
+    if (gl.keys[XK_Right] && gl.keys[XK_Down])
+        g.ship.angle = 225;
+    if (gl.keys[XK_Left] && gl.keys[XK_Down])
+        g.ship.angle = 135;
     if (gl.keys[XK_space]) {
         //a little time between each bullet
         struct timespec bt;
