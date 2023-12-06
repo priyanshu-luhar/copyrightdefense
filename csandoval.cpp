@@ -277,6 +277,8 @@ void moveSmallAsteroidsTowardsShip() {
         a = a->next;
     }
 }
+extern double speedrate;
+extern bool shotgun_mode;
 //----------------------------------------------------------------------------------------------------//
 void resetGame() {
     g.ship = Ship(); // Reset the ship
@@ -291,6 +293,8 @@ void resetGame() {
     gameStartTime = time(NULL);
     g.collectedCoins = 0;
     g.score = 0;
+    speedrate = 1;
+    shotgun_mode = false;
     
     // Initialize the asteroids again
     while (g.ahead != NULL) {
