@@ -12,6 +12,7 @@
 // Multiple animations implemented (Attack, hit, etc.)
 // Dynamic Health bar
 // Dynamic statuses that affect the player and enemies
+
 #ifdef USE_OPENAL_SOUND
 #include <stdio.h> //
 #include <string.h> //
@@ -23,7 +24,6 @@
 #endif //USE_OPENAL_SOUND
 
 #include <iostream>
-#include <unistd.h>
 #include <ctime>
 #include <cmath>
 #include <X11/Xlib.h>
@@ -34,6 +34,11 @@
 #include "header.h"
 
 using namespace std;
+
+extern Global gl;
+extern Game g;
+extern X11_wrapper x11;
+
 /*
 int total_running_time(const bool get)
 {
@@ -127,4 +132,45 @@ void play_sound(int select)
         // return 0;
     }
 #endif
+
+}
+// extern static int MAX_BULLETS;
+extern int Lives;
+extern int MAX_BULLETS;
+extern double speedrate;
+extern bool shotgun_mode;
+
+void coins_buffs(int coins)
+{
+    static bool flag1 = false;
+    static bool flag2 = false;
+    static bool flag3 = false;
+
+    if (coins == 5 || coins == 10 || coins == 15 || coins == 20 || coins == 25 || coins == 30) {
+        speedrate = speedrate + 0.5;
+    }
+
+    if (coins >= 10 && flag1 == false) {
+        flag1 = true;
+        MAX_BULLETS = 10;
+    }
+    if (coins >= 20 && flag2 == false) {
+        flag2 = true;
+        shotgun_mode = true;
+        // return 1;
+    }
+    if (coins >= 5 && flag3 == false) {
+        flag3 = true;
+        Lives = Lives + 1;
+
+/*
+        Rect r;
+        r.bot = gl.yres / 2;
+        r.left = gl.xres / 2;
+        r.center = 1;
+        ggprint16(&r, 16, 0xFFFFFFFF, "You have gained a life!");
+        // x11.swapBuffers();
+        // Add a 3-second delay using usleep
+        usleep(2000000); // 3 */
+    }
 }
