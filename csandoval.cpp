@@ -89,7 +89,7 @@ void handleMenu() {
 
         r.bot -= 20;  // Adjust the vertical spacing
 
-        if (menuChoice == 1)
+        if (menuChoice == 2)
             ggprint8b(&r, 24, 0x00ff0000, "> Quit");  // Increase font size to 24
         else
             ggprint8b(&r, 24, 0x00ffffff, "Quit");  // Increase font size to 24
