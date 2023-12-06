@@ -35,6 +35,8 @@ const float timeslice = 1.0f;
 const float gravity = 2.2f;
 #define PI 3.141592653589793
 #define ALPHA 1
+#define DEG2RAD (PI / 180.0)
+
 const int MAX_BULLETS = 5;
 const Flt MINIMUM_ASTEROID_SIZE = 40.0;
 const float MINIMUM_ASTEROID_DISTANCE = 400.0; 
@@ -99,7 +101,14 @@ Bullet::Bullet() {
 Asteroid::Asteroid() {
     prev = NULL;
     next = NULL;
-    
+
+}
+
+Coin::Coin() {
+    // Initialize Coin members
+    VecZero(pos);
+    radius = 5.0f;  // You can set this to whatever is appropriate for your game
+    active = false;
 }
 
 Game::Game() {
@@ -108,6 +117,13 @@ Game::Game() {
     nasteroids = 0;
     nbullets = 0;
     mouseThrustOn = false;
+    collectedCoins = 0; // Initialize collected coins count
+
+    score = 0;
+    for (int i = 0; i < 5; i++) {
+        spawnCoin(); // Initially spawn 5 coins
+    }
+
     for (int j = 0; j < 10; j++) {
         Asteroid *a = new Asteroid;
         a->nverts = 6;
@@ -161,6 +177,19 @@ Game::Game() {
     }
     clock_gettime(CLOCK_REALTIME, &bulletTimer);
 }
+
+void Game::spawnCoin() {
+    for (int i = 0; i < 5; i++) {
+        if (!g.coins[i].active) {
+            // Set coin's position and make it active
+            g.coins[i].pos[0] = rnd() * gl.xres;
+            g.coins[i].pos[1] = rnd() * gl.yres;
+            g.coins[i].active = true;
+            break;
+        }
+    }
+}
+
 
 Game::~Game() {
     delete [] barr;
@@ -834,25 +863,25 @@ void physics()
         g.ship.angle = 90;
         g.ship.pos[0] = g.ship.pos[0] - 2;
         /*
-        g.ship.angle += 8.0;
-        if (g.ship.angle >= 360.0f)
-            g.ship.angle -= 360.0f;
-        */
+           g.ship.angle += 8.0;
+           if (g.ship.angle >= 360.0f)
+           g.ship.angle -= 360.0f;
+           */
     }
     if (gl.keys[XK_Right]) {
         g.ship.angle = 270;
         g.ship.pos[0] = g.ship.pos[0] + 2;
         /*
-        g.ship.angle -= 8.0;
-        if (g.ship.angle < 0.0f)
-            g.ship.angle += 360.0f;
-        */
+           g.ship.angle -= 8.0;
+           if (g.ship.angle < 0.0f)
+           g.ship.angle += 360.0f;
+           */
     }
     if (gl.keys[XK_Up]) {
         //apply thrust
         //convert ship angle to radians
         /*
-        Flt rad = ((g.ship.angle+90.0) / 360.0f) * PI * 2.0;
+           Flt rad = ((g.ship.angle+90.0) / 360.0f) * PI * 2.0;
         //convert angle to a vector
 
         Flt xdir = cos(rad);
@@ -862,12 +891,12 @@ void physics()
         g.ship.vel[0] += xdir*0.01f;
         g.ship.vel[1] += ydir*0.01f;
         Flt speed = sqrt(g.ship.vel[0]*g.ship.vel[0]+
-                g.ship.vel[1]*g.ship.vel[1]);
+        g.ship.vel[1]*g.ship.vel[1]);
         if (speed > 0.5f) {
-            speed = 0.5f;
-            normalize2d(g.ship.vel);
-            g.ship.vel[0] *= speed;
-            g.ship.vel[1] *= speed;
+        speed = 0.5f;
+        normalize2d(g.ship.vel);
+        g.ship.vel[0] *= speed;
+        g.ship.vel[1] *= speed;
         }
         */
         g.ship.angle = 360;
@@ -929,6 +958,31 @@ void physics()
         if (tdif < -0.3)
             g.mouseThrustOn = false;
     }
+
+    int activeCoins = 0;
+    for (int i = 0; i < 5; i++) {
+        if (g.coins[i].active) {
+            activeCoins++;
+
+            // Check for collision with the ship
+            Flt dx = g.ship.pos[0] - g.coins[i].pos[0];
+            Flt dy = g.ship.pos[1] - g.coins[i].pos[1];
+            Flt dist = sqrt(dx*dx + dy*dy);
+
+            if (dist < (g.ship.radius + g.coins[i].radius)) {
+                // Collision detected
+                g.coins[i].active = false;
+                g.score += 200; // Add points to score
+                g.collectedCoins++; // Increment the collected coins counter
+                activeCoins--;
+            }
+        }
+    }
+    // If less than 5 coins are active, spawn new ones
+    while (activeCoins < 5) {
+        g.spawnCoin();
+        activeCoins++;
+    }
 }
 
 void render()
@@ -944,6 +998,9 @@ void render()
     ggprint16(&r, 16, 0x00ffff00, "Number of Enemies: %i", g.nasteroids);
     ggprint16(&r, 16, 0x0000FF00, "Number of Lives: %i", Lives);
     ggprint16(&r, 16, 0x00ff0000, "Time left: %i", countdown);
+    ggprint16(&r, 16, 0x00ff0000, "Collected Coins: %i", g.collectedCoins);
+    ggprint16(&r, 16, 0x00ff0000, "Score: %i", g.score);
+
 
     if (isPaused) {
         displayPauseMenu();
@@ -1007,7 +1064,19 @@ void render()
                 mouse_movement_distance(-1, -1, true));
     }
 
-
+    for (int i = 0; i < 5; i++) {
+        if (g.coins[i].active) {
+            // Draw the coin
+            glColor3f(1.0, 0.84, 0); // gold color for the coin
+            glBegin(GL_POLYGON);
+            for (int j = 0; j < 360; j += 5) {
+                float degInRad = j * DEG2RAD;
+                glVertex2f(cos(degInRad) * g.coins[i].radius + g.coins[i].pos[0],
+                        sin(degInRad) * g.coins[i].radius + g.coins[i].pos[1]);
+            }
+            glEnd();
+        }
+    }
 
     //-------------------------------------------------------------------------
     //Draw the ship
