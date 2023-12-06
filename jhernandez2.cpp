@@ -159,10 +159,9 @@ void coins_buffs(int coins)
         shotgun_mode = true;
         // return 1;
     }
-    if (coins >= 5 && flag3 == false) {
+    if (coins >= 30 && flag3 == false) {
         flag3 = true;
         Lives = Lives + 1;
-
 /*
         Rect r;
         r.bot = gl.yres / 2;
