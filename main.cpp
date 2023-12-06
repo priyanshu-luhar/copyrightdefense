@@ -41,7 +41,7 @@ const float gravity = 2.2f;
 
 int MAX_BULLETS = 5; //Not a const int so can be altered
 bool shotgun_mode = false;
-const Flt MINIMUM_ASTEROID_SIZE = 40.0;
+const Flt MINIMUM_ASTEROID_SIZE = 70.0;
 const float MINIMUM_ASTEROID_DISTANCE = 400.0; 
 // Adjust this value as needed 
 //-----------------------------------------------------------------------------
