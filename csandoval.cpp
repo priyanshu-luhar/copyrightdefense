@@ -238,6 +238,7 @@ void checkShipAsteroidCollision() {
             // If Lives reach 0, display Game Over and end game loop, until then, reset the game and continue
             if (Lives == 0) {
                 usleep(3000000);
+                play_sound(1);
                 displayGameOver();
             } else {
                 usleep(2000000);
