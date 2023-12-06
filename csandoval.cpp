@@ -82,10 +82,10 @@ void handleMenu() {
             ggprint8b(&r, 24, 0x00ffffff, "Start Game");
         r.bot -= 20;
 
-        // if (menuChoice == 1)
-        //     ggprint8b(&r, 24, 0x00ff0000, "> Options");  // Increase font size to 24
-        // else
-        //     ggprint8b(&r, 24, 0x00ffffff, "Options");  // Increase font size to 24
+        if (menuChoice == 1)
+            ggprint8b(&r, 24, 0x00ff0000, "> Options");  // Increase font size to 24
+        else
+            ggprint8b(&r, 24, 0x00ffffff, "Options");  // Increase font size to 24
 
         r.bot -= 20;  // Adjust the vertical spacing
 
@@ -105,7 +105,7 @@ void handleMenu() {
                     case XK_s:
                         if (menuChoice == 0) {
                             inMenu = false;  // Start the game
-                        } else if (menuChoice == 1) {
+                        } else if (menuChoice == 2) {
                             // Quit the game
                             exit(0);
                         }
