@@ -288,7 +288,9 @@ void resetGame() {
     gameWon = false;
     countdown = 90; // Reset the countdown to 90
     gameStartTime = time(NULL);
-
+    g.collectedCoins = 0;
+    g.score = 0;
+    
     // Initialize the asteroids again
     while (g.ahead != NULL) {
         Asteroid *temp = g.ahead;
